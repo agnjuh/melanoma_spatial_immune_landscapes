@@ -149,7 +149,7 @@ Marker-based classification of local immune microenvironment states.
 
 ---
 
-# Region annotation
+## Region annotation
 
 Spatial domains were identified by Leiden clustering and annotated using marker genes and tissue context.
 
@@ -169,7 +169,7 @@ Annotated regions include:
 
 ---
 
-# Key findings
+## Key findings
 
 1. Melanoma-associated transcriptional programmes form spatially coherent tumour territories.
 
@@ -183,7 +183,7 @@ Annotated regions include:
 
 ---
 
-# Repository structure
+## Repository structure
 
 ```text
 melanoma_spatial_immune_landscapes/
@@ -217,7 +217,7 @@ melanoma_spatial_immune_landscapes/
 
 ---
 
-# Reproducibility
+## Reproducibility
 
 The analysis is implemented as a reproducible Snakemake workflow.
 
@@ -235,7 +235,7 @@ snakemake -n
 
 ---
 
-# Requirements
+## Requirements
 
 Major dependencies:
 
@@ -250,7 +250,7 @@ Major dependencies:
 
 ---
 
-# Future directions
+## Future directions
 
 Planned extensions include:
 
