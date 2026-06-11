@@ -1,4 +1,4 @@
-# melanoma_spatial_immune_landscapes
+# Spatial organisation of tumour, stromal and immune programmes in human melanoma
 
 Spatial transcriptomic mapping of tumour, stromal, and immune microenvironment programmes in human melanoma using 10x Genomics Visium data.
 
@@ -268,3 +268,10 @@ Planned extensions include:
 - Squidpy-based spatial graph analysis
 - Cross-sample spatial programme comparison
 
+---
+
+## Citation
+
+If you use this repository please cite:
+
+Juhász, Á. J. (2026). *Spatial organisation of tumour, stromal and immune programmes in human melanoma* [Computer software]. GitHub. https://github.com/agnjuh/melanoma_spatial_immune_landscapes
