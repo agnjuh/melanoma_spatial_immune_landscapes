@@ -1,0 +1,43 @@
+project: melanoma_spatial_immune_landscapes
+
+samples_file: metadata/samples.tsv
+
+markers:
+  melanoma:
+    - MLANA
+    - PMEL
+    - TYR
+    - MITF
+    - SOX10
+  t_cell:
+    - CD3D
+    - CD3E
+    - CD8A
+    - TRAC
+    - TRBC1
+  cytotoxic:
+    - NKG7
+    - GZMB
+    - PRF1
+    - GNLY
+  interferon:
+    - IFNG
+    - CXCL9
+    - CXCL10
+    - STAT1
+    - IRF1
+  stromal_exclusion:
+    - COL1A1
+    - COL3A1
+    - FN1
+    - FAP
+    - TGFB1
+
+qc:
+  min_counts: 500
+  min_genes: 200
+  max_mito_pct: 25
+
+classification:
+  inflamed_quantile: 0.75
+  desert_quantile: 0.25

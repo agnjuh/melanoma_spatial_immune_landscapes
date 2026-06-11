@@ -1,0 +1,22 @@
+name: melanoma-spatial
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - pip
+  - snakemake
+  - scanpy
+  - squidpy
+  - anndata
+  - pandas
+  - numpy
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - pyyaml
+  - leidenalg
+  - python-igraph
+  - pip:
+      - liana

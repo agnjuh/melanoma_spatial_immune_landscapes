@@ -1,0 +1,205 @@
+import pandas as pd
+
+configfile: "config.yaml"
+
+SAMPLES = pd.read_csv(config["samples_file"], sep="\t")
+SAMPLE_IDS = SAMPLES["sample_id"].tolist()
+SAMPLE_PATHS = dict(zip(SAMPLES["sample_id"], SAMPLES["visium_path"]))
+
+
+rule all:
+    input:
+        expand("results/h5ad/{sample}.h5ad", sample=SAMPLE_IDS),
+        expand("results/scored/{sample}.h5ad", sample=SAMPLE_IDS),
+        expand("results/classified/{sample}.h5ad", sample=SAMPLE_IDS),
+        expand("results/clustered/{sample}.h5ad", sample=SAMPLE_IDS),
+        expand("results/annotated/{sample}.h5ad", sample=SAMPLE_IDS),
+        expand("results/markers/{sample}", sample=SAMPLE_IDS),
+
+        expand("figures/spatial_scores/{sample}/melanoma_score.png", sample=SAMPLE_IDS),
+        expand("figures/immune_states/{sample}_immune_states.png", sample=SAMPLE_IDS),
+        expand("figures/clustering/{sample}/spatial_leiden_clusters.png", sample=SAMPLE_IDS),
+        expand("figures/annotations/{sample}_region_annotations.png", sample=SAMPLE_IDS),
+        expand("figures/tissue_overlays/{sample}/immune_states_tissue_overlay.png", sample=SAMPLE_IDS),
+
+        expand("figures/morphology_overlays/{sample}/tissue_morphology_reference.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/melanoma_programme_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/stromal_programme_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/interferon_response_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/tcell_infiltration_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/cytotoxic_activity_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand("figures/morphology_overlays/{sample}/immune_states_morphology_overlay.png", sample=SAMPLE_IDS)
+
+
+rule prepare_visium:
+    input:
+        lambda wc: SAMPLE_PATHS[wc.sample]
+    output:
+        "results/h5ad/{sample}.h5ad"
+    shell:
+        """
+        python scripts/prepare_visium.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule score_markers:
+    input:
+        "results/h5ad/{sample}.h5ad"
+    output:
+        "results/scored/{sample}.h5ad"
+    shell:
+        """
+        python scripts/score_markers.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_scores:
+    input:
+        "results/scored/{sample}.h5ad"
+    output:
+        "figures/spatial_scores/{sample}/melanoma_score.png"
+    params:
+        outdir="figures/spatial_scores/{sample}"
+    shell:
+        """
+        python scripts/plot_scores.py \
+            --input {input} \
+            --outdir {params.outdir}
+        """
+
+
+rule classify_immune_states:
+    input:
+        "results/scored/{sample}.h5ad"
+    output:
+        "results/classified/{sample}.h5ad"
+    shell:
+        """
+        python scripts/classify_immune_states.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_immune_states:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        "figures/immune_states/{sample}_immune_states.png"
+    shell:
+        """
+        python scripts/plot_immune_states.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule cluster_spots:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        "results/clustered/{sample}.h5ad"
+    shell:
+        """
+        python scripts/cluster_spots.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_clusters:
+    input:
+        "results/clustered/{sample}.h5ad"
+    output:
+        "figures/clustering/{sample}/spatial_leiden_clusters.png"
+    params:
+        outdir="figures/clustering/{sample}"
+    shell:
+        """
+        python scripts/plot_clusters.py \
+            --input {input} \
+            --outdir {params.outdir}
+        """
+
+
+rule cluster_markers:
+    input:
+        "results/clustered/{sample}.h5ad"
+    output:
+        directory("results/markers/{sample}")
+    shell:
+        """
+        python scripts/cluster_markers.py \
+            --input {input} \
+            --outdir {output}
+        """
+
+
+rule annotate_clusters:
+    input:
+        "results/clustered/{sample}.h5ad"
+    output:
+        "results/annotated/{sample}.h5ad"
+    shell:
+        """
+        python scripts/annotate_clusters.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_region_annotations:
+    input:
+        "results/annotated/{sample}.h5ad"
+    output:
+        "figures/annotations/{sample}_region_annotations.png"
+    shell:
+        """
+        python scripts/plot_region_annotations.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_tissue_overlays:
+    input:
+        h5ad="results/classified/{sample}.h5ad"
+    output:
+        "figures/tissue_overlays/{sample}/immune_states_tissue_overlay.png"
+    params:
+        visium_path=lambda wc: SAMPLE_PATHS[wc.sample],
+        outdir="figures/tissue_overlays/{sample}"
+    shell:
+        """
+        python scripts/plot_tissue_overlays.py \
+            --input {input.h5ad} \
+            --visium_path {params.visium_path} \
+            --outdir {params.outdir}
+        """
+
+
+rule plot_morphology_overlays:
+    input:
+        h5ad="results/classified/{sample}.h5ad"
+    output:
+        tissue="figures/morphology_overlays/{sample}/tissue_morphology_reference.png",
+        melanoma="figures/morphology_overlays/{sample}/melanoma_programme_morphology_overlay.png",
+        stromal="figures/morphology_overlays/{sample}/stromal_programme_morphology_overlay.png",
+        interferon="figures/morphology_overlays/{sample}/interferon_response_morphology_overlay.png",
+        tcell="figures/morphology_overlays/{sample}/tcell_infiltration_morphology_overlay.png",
+        cytotoxic="figures/morphology_overlays/{sample}/cytotoxic_activity_morphology_overlay.png",
+        immune="figures/morphology_overlays/{sample}/immune_states_morphology_overlay.png"
+    params:
+        visium_path=lambda wc: SAMPLE_PATHS[wc.sample],
+        outdir="figures/morphology_overlays/{sample}"
+    shell:
+        """
+        python scripts/plot_morphology_overlays.py \
+            --input {input.h5ad} \
+            --visium_path {params.visium_path} \
+            --outdir {params.outdir}
+        """
