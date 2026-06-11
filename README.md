@@ -4,6 +4,8 @@ Spatial transcriptomic mapping of tumour, stromal, and immune microenvironment p
 
 This repository implements a reproducible Snakemake workflow for analysing Visium spatial transcriptomics data and exploring how tumour-associated, stromal, and immune-associated transcriptional programmes are organised across melanoma tissue sections. The workflow integrates marker-based programme scoring, immune-state classification, spatial clustering, marker discovery, region annotation, and morphology-aware visualisation.
 
+The workflow is designed to process one or multiple Visium samples defined in `samples.tsv`. The repository currently includes a demonstration analysis of the 10x Genomics Human Skin Melanoma FFPE dataset.
+
 ---
 
 ## Overview
