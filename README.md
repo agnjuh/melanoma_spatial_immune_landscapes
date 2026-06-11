@@ -146,19 +146,9 @@ Marker-based classification of local immune microenvironment states.
 
 ---
 
-# Spatial clustering
-
-Leiden clustering was performed to identify spatially coherent transcriptional domains.
-
-<p align="center">
-  <img src="figures/clustering/melanoma_if_ffpe/spatial_leiden_clusters.png" width="700">
-</p>
-
----
-
 # Region annotation
 
-Spatial domains were annotated using cluster marker genes and tissue context.
+Spatial domains were identified by Leiden clustering and annotated using marker genes and tissue context.
 
 Annotated regions include:
 
