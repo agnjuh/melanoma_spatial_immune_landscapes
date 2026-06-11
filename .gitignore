@@ -23,7 +23,7 @@ data/processed/
 
 # Large outputs
 results/
-figures/
+#figures/
 
 # IDE
 .vscode/
