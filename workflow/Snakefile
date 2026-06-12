@@ -28,7 +28,11 @@ rule all:
         expand("figures/morphology_overlays/{sample}/interferon_response_morphology_overlay.png", sample=SAMPLE_IDS),
         expand("figures/morphology_overlays/{sample}/tcell_infiltration_morphology_overlay.png", sample=SAMPLE_IDS),
         expand("figures/morphology_overlays/{sample}/cytotoxic_activity_morphology_overlay.png", sample=SAMPLE_IDS),
-        expand("figures/morphology_overlays/{sample}/immune_states_morphology_overlay.png", sample=SAMPLE_IDS)
+        expand("figures/morphology_overlays/{sample}/immune_states_morphology_overlay.png", sample=SAMPLE_IDS),
+        expand(
+            "results/summary/{sample}_immune_state_summary.csv",
+            sample=SAMPLE_IDS
+        ),
 
 
 rule prepare_visium:
@@ -202,4 +206,16 @@ rule plot_morphology_overlays:
             --input {input.h5ad} \
             --visium_path {params.visium_path} \
             --outdir {params.outdir}
+        """
+
+rule summarise_immune_states:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        "results/summary/{sample}_immune_state_summary.csv"
+    shell:
+        """
+        python scripts/summarise_immune_states.py \
+            --input {input} \
+            --output {output}
         """
