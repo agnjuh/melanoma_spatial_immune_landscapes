@@ -37,7 +37,9 @@ rule all:
 
         expand("figures/statistics/{sample}_correlation_heatmap.png", sample=SAMPLE_IDS),
         expand("figures/interface/{sample}_distance_histogram.png", sample=SAMPLE_IDS),
-        expand("figures/interface/{sample}_interface_map.png", sample=SAMPLE_IDS)
+        expand("figures/interface/{sample}_interface_map.png", sample=SAMPLE_IDS),
+        expand("results/neighbourhood/{sample}_immune_state_neighbourhood.csv", sample=SAMPLE_IDS),
+        expand("figures/neighbourhood/{sample}_immune_state_neighbourhood_matrix.png", sample=SAMPLE_IDS),
 
 
 rule prepare_visium:
@@ -289,6 +291,33 @@ rule plot_interface_map:
     shell:
         """
         python scripts/plot_interface_map.py \
+            --input {input} \
+            --output {output}
+        """
+
+rule spatial_neighbourhood_analysis:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        "results/neighbourhood/{sample}_immune_state_neighbourhood.csv"
+    shell:
+        """
+        python scripts/spatial_neighbourhood_analysis.py \
+            --input {input} \
+            --output {output} \
+            --cluster_key immune_state \
+            --radius 700
+        """
+
+
+rule plot_neighbourhood_matrix:
+    input:
+        "results/neighbourhood/{sample}_immune_state_neighbourhood.csv"
+    output:
+        "figures/neighbourhood/{sample}_immune_state_neighbourhood_matrix.png"
+    shell:
+        """
+        python scripts/plot_neighbourhood_matrix.py \
             --input {input} \
             --output {output}
         """

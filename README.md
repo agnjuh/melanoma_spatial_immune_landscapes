@@ -11,7 +11,9 @@ The workflow integrates:
 - Region annotation
 - Morphology-aware visualisation
 - Quantitative spatial analysis
+- Programme correlation analysis
 - Tumour–immune interface analysis
+- Spatial neighbourhood analysis
 
 ---
 
@@ -28,6 +30,7 @@ This workflow aims to:
 - Discover region-specific marker genes
 - Quantify relationships between spatial programmes
 - Identify tumour–immune interface regions
+- Characterise local spatial neighbourhood structure
 - Visualise transcriptional programmes directly on tissue morphology
 
 ---
@@ -58,11 +61,17 @@ Visium spatial transcriptomics
             ▼
  Quantitative analysis
             │
-            ▼
- Tumour–immune interface analysis
-            │
-            ▼
- Morphology-aware visualisation
+            ├──────────────┐
+            ▼              ▼
+ Programme          Tumour–immune
+ correlations       interface analysis
+            │              │
+            └──────┬───────┘
+                   ▼
+      Spatial neighbourhood analysis
+                   │
+                   ▼
+     Morphology-aware visualisation
 ```
 
 ---
@@ -77,7 +86,7 @@ Human melanoma Visium dataset:
 
 The workflow is designed to process one or multiple Visium samples defined in `metadata/samples.tsv`.
 
-This repository currently includes a demonstration analysis of the 10x Genomics Human Skin Melanoma FFPE dataset.
+This repository currently includes a demonstration analysis of a single 10x Genomics Human Skin Melanoma FFPE tissue section.
 
 ---
 
@@ -289,6 +298,44 @@ Interface regions highlight local tumour–immune boundaries that may represent 
 
 ---
 
+# Spatial neighbourhood analysis
+
+The workflow quantifies local spatial relationships between immune-state categories using Visium spot coordinates.
+
+Neighbourhood graphs are constructed using a user-defined spatial radius and the frequency of neighbouring immune-state pairs is calculated across the tissue section.
+
+Outputs:
+
+```text
+results/neighbourhood/{sample}_immune_state_neighbourhood.csv
+figures/neighbourhood/{sample}_immune_state_neighbourhood_matrix.png
+```
+
+---
+
+## Immune-state neighbourhood matrix
+
+Spatial neighbourhood frequencies can be visualised as a pairwise interaction matrix.
+
+<p align="center">
+  <img src="figures/neighbourhood/melanoma_if_ffpe_immune_state_neighbourhood_matrix.png" width="650">
+</p>
+
+For the demonstration melanoma section, the strongest neighbourhood relationships include:
+
+- Desert–desert neighbourhoods
+- Other–other neighbourhoods
+- Immune niche–immune niche neighbourhoods
+- Immune niche–other neighbourhoods
+
+The immune-excluded state is rare within this tissue section and therefore contributes relatively few neighbourhood edges.
+
+These results indicate that immune-associated transcriptional states exhibit local spatial organisation rather than random distribution across the tissue.
+
+Importantly, these observations describe spatial structure within a single Visium tissue section and should not be interpreted as cohort-level melanoma characteristics.
+
+---
+
 ## Key findings
 
 1. Melanoma-associated transcriptional programmes form spatially coherent tumour territories.
@@ -305,7 +352,9 @@ Interface regions highlight local tumour–immune boundaries that may represent 
 
 7. Tumour–immune interface regions can be identified and quantified using spatial proximity analysis.
 
-8. Integration of tissue morphology and transcriptional programmes reveals complex spatial organisation of tumour, stromal and immune compartments.
+8. Immune-associated transcriptional states exhibit non-random spatial neighbourhood structure.
+
+9. Integration of tissue morphology and transcriptional programmes reveals complex spatial organisation of tumour, stromal and immune compartments.
 
 ---
 
@@ -335,13 +384,15 @@ melanoma_spatial_immune_landscapes/
 │   ├── markers/
 │   ├── summary/
 │   ├── statistics/
-│   └── interface/
+│   ├── interface/
+│   └── neighbourhood/
 │
 └── figures/
     ├── morphology_overlays/
     ├── annotations/
     ├── statistics/
     ├── interface/
+    ├── neighbourhood/
     └── tissue_overlays/
 ```
 
@@ -385,7 +436,7 @@ Major dependencies:
 Planned extensions include:
 
 - Multi-sample melanoma cohorts
-- Spatial neighbourhood enrichment analysis
+- Statistical neighbourhood enrichment testing
 - Squidpy-based spatial graph analysis
 - Tumour–stroma interaction modelling
 - Hot versus cold tumour quantification
@@ -397,6 +448,17 @@ Planned extensions include:
 
 ## Citation
 
-If you use this repository in academic work, please cite:
+If you use this repository, please cite:
 
 Juhász, Á. J. (2026). *Spatial organisation of tumour, stromal and immune programmes in human melanoma* [Computer software]. GitHub. https://github.com/agnjuh/melanoma_spatial_immune_landscapes
+
+### BibTeX
+
+```bibtex
+@software{juhasz2026melanoma,
+  author = {Juhász, Ágnes Judit},
+  title = {Spatial organisation of tumour, stromal and immune programmes in human melanoma},
+  year = {2026},
+  url = {https://github.com/agnjuh/melanoma_spatial_immune_landscapes}
+}
+```
