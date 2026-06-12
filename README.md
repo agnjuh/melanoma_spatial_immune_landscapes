@@ -1,9 +1,17 @@
 # Spatial organisation of tumour, stromal and immune programmes in human melanoma
 
-Spatial transcriptomic mapping of tumour, stromal, and immune microenvironment programmes in human melanoma using 10x Genomics Visium data.
+This repository implements a reproducible Snakemake workflow for analysing Visium spatial transcriptomics data and exploring how tumour-associated, stromal, and immune-associated transcriptional programmes are organised across melanoma tissue sections.
 
-This repository implements a reproducible Snakemake workflow for analysing Visium spatial transcriptomics data and exploring how tumour-associated, stromal, and immune-associated transcriptional programmes are organised across melanoma tissue sections. The workflow integrates marker-based programme scoring, immune-state classification, spatial clustering, marker discovery, region annotation, and morphology-aware visualisation.
+The workflow integrates:
 
+- Marker-based programme scoring
+- Immune-state classification
+- Spatial clustering
+- Marker discovery
+- Region annotation
+- Morphology-aware visualisation
+- Quantitative spatial analysis
+- Tumour–immune interface analysis
 
 ---
 
@@ -13,12 +21,14 @@ Melanoma progression is influenced not only by tumour-intrinsic transcriptional 
 
 This workflow aims to:
 
-- Identify melanoma-associated transcriptional territories.
-- Characterise stromal and extracellular-matrix-rich regions.
-- Map immune-associated transcriptional programmes.
-- Classify spatial immune states.
-- Discover region-specific marker genes.
-- Visualise transcriptional programmes directly on tissue morphology.
+- Identify melanoma-associated transcriptional territories
+- Characterise stromal and extracellular-matrix-rich regions
+- Map immune-associated transcriptional programmes
+- Classify spatial immune states
+- Discover region-specific marker genes
+- Quantify relationships between spatial programmes
+- Identify tumour–immune interface regions
+- Visualise transcriptional programmes directly on tissue morphology
 
 ---
 
@@ -46,6 +56,12 @@ Visium spatial transcriptomics
     Region annotation
             │
             ▼
+ Quantitative analysis
+            │
+            ▼
+ Tumour–immune interface analysis
+            │
+            ▼
  Morphology-aware visualisation
 ```
 
@@ -59,7 +75,9 @@ Human melanoma Visium dataset:
 - Sample: CytAssist FFPE Human Skin Melanoma
 - Tissue section containing melanoma, stromal compartments, and immune-associated regions
 
-The workflow is designed to process one or multiple Visium samples defined in `metadata/samples.tsv`. This repository currently includes a demonstration analysis of the 10x Genomics Human Skin Melanoma FFPE dataset.
+The workflow is designed to process one or multiple Visium samples defined in `metadata/samples.tsv`.
+
+This repository currently includes a demonstration analysis of the 10x Genomics Human Skin Melanoma FFPE dataset.
 
 ---
 
@@ -169,17 +187,125 @@ Annotated regions include:
 
 ---
 
+# Quantitative spatial analysis
+
+## Immune-state composition
+
+The workflow summarises the number and proportion of spots assigned to each immune state.
+
+Output:
+
+```text
+results/summary/{sample}_immune_state_summary.csv
+```
+
+Example melanoma tissue section:
+
+| Immune state | Spots |
+|-------------|-------:|
+| Inflamed | 330 |
+| Excluded | 18 |
+| Desert | 1035 |
+| Immune niche | 817 |
+| Other | 1258 |
+
+This demonstrates substantial spatial heterogeneity of immune-associated transcriptional programmes within a single melanoma specimen.
+
+---
+
+## Programme correlation structure
+
+Spatial programme scores are compared using pairwise Spearman and Pearson correlation analyses.
+
+Outputs:
+
+```text
+results/statistics/{sample}_programme_correlations.csv
+figures/statistics/{sample}_correlation_heatmap.png
+```
+
+<p align="center">
+  <img src="figures/statistics/melanoma_if_ffpe_correlation_heatmap.png" width="650">
+</p>
+
+Key observations from the demonstration dataset include:
+
+- Strong negative spatial correlation between melanoma and stromal programmes
+- Negative association between melanoma and interferon activity
+- Positive association between T-cell and interferon programmes
+- Positive association between stromal and interferon-associated activity
+
+These results suggest spatial separation between melanoma-dominant and stromal/immune-associated regions.
+
+---
+
+# Tumour–immune interface analysis
+
+The workflow identifies melanoma-high regions, immune-associated regions, and tumour–immune interface zones using spatial proximity relationships.
+
+Melanoma-high spots are defined from the upper quantile of melanoma programme activity. Immune-associated spots are defined using immune-inflamed and immune-niche classifications.
+
+Outputs:
+
+```text
+results/interface/{sample}_interface_distances.csv
+results/interface/{sample}_interface_summary.csv
+
+figures/interface/{sample}_distance_histogram.png
+figures/interface/{sample}_interface_map.png
+```
+
+---
+
+## Immune-to-tumour distance distribution
+
+The distance from each immune-associated spot to its nearest melanoma-high region is quantified.
+
+<p align="center">
+  <img src="figures/interface/melanoma_if_ffpe_distance_histogram.png" width="650">
+</p>
+
+Example statistics:
+
+- Melanoma-high spots: 1038
+- Immune-associated spots: 1147
+- Interface spots: 208
+- Interface fraction: 6.0%
+- Median immune-to-tumour distance: 533.5 spatial units
+
+The distribution indicates that while some immune populations occupy peritumoural regions, others remain spatially separated from melanoma-enriched territories.
+
+---
+
+## Tumour–immune interface map
+
+Tumour-rich regions, immune-associated regions and interface zones can be visualised directly in spatial coordinates.
+
+<p align="center">
+  <img src="figures/interface/melanoma_if_ffpe_interface_map.png" width="700">
+</p>
+
+Interface regions highlight local tumour–immune boundaries that may represent biologically relevant interaction zones.
+
+---
+
 ## Key findings
 
 1. Melanoma-associated transcriptional programmes form spatially coherent tumour territories.
 
-2. Stromal and extracellular-matrix programmes are enriched at tissue boundaries and connective-tissue structures.
+2. Stromal and extracellular-matrix programmes occupy transcriptionally distinct spatial domains.
 
-3. Interferon-associated transcriptional activity exhibits spatial heterogeneity across the tissue section.
+3. Interferon-associated activity exhibits substantial spatial heterogeneity across the tissue section.
 
 4. Multiple immune microenvironment states coexist within the same melanoma specimen.
 
-5. Integration of tissue morphology and transcriptional programmes reveals spatial organisation of tumour, stromal, and immune compartments.
+5. Melanoma and stromal programmes display strong spatial segregation.
+
+6. T-cell and interferon-associated programmes show coordinated spatial organisation.
+
+7. Tumour–immune interface regions can be identified and quantified using spatial proximity analysis.
+
+8. Integration of tissue morphology and transcriptional programmes reveals complex spatial organisation of tumour, stromal and immune compartments.
 
 ---
 
@@ -206,20 +332,24 @@ melanoma_spatial_immune_landscapes/
 │   ├── classified/
 │   ├── clustered/
 │   ├── annotated/
-│   └── markers/
+│   ├── markers/
+│   ├── summary/
+│   ├── statistics/
+│   └── interface/
 │
 └── figures/
     ├── morphology_overlays/
-    ├── clustering/
     ├── annotations/
-    └── immune_states/
+    ├── statistics/
+    ├── interface/
+    └── tissue_overlays/
 ```
 
 ---
 
 ## Reproducibility
 
-The analysis is implemented as a reproducible Snakemake workflow.
+The analysis is implemented as a fully reproducible Snakemake workflow.
 
 Run the complete workflow:
 
@@ -256,15 +386,17 @@ Planned extensions include:
 
 - Multi-sample melanoma cohorts
 - Spatial neighbourhood enrichment analysis
-- Tumour–immune interface analysis
-- Hot versus cold tumour quantification
 - Squidpy-based spatial graph analysis
+- Tumour–stroma interaction modelling
+- Hot versus cold tumour quantification
 - Cross-sample spatial programme comparison
+- Spatial autocorrelation analysis
+- Cell-state neighbourhood mapping
 
 ---
 
 ## Citation
 
-If you use this repository please cite:
+If you use this repository in academic work, please cite:
 
 Juhász, Á. J. (2026). *Spatial organisation of tumour, stromal and immune programmes in human melanoma* [Computer software]. GitHub. https://github.com/agnjuh/melanoma_spatial_immune_landscapes

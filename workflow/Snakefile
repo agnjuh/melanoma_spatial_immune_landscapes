@@ -16,6 +16,11 @@ rule all:
         expand("results/annotated/{sample}.h5ad", sample=SAMPLE_IDS),
         expand("results/markers/{sample}", sample=SAMPLE_IDS),
 
+        expand("results/summary/{sample}_immune_state_summary.csv", sample=SAMPLE_IDS),
+        expand("results/statistics/{sample}_programme_correlations.csv", sample=SAMPLE_IDS),
+        expand("results/interface/{sample}_interface_distances.csv", sample=SAMPLE_IDS),
+        expand("results/interface/{sample}_interface_summary.csv", sample=SAMPLE_IDS),
+
         expand("figures/spatial_scores/{sample}/melanoma_score.png", sample=SAMPLE_IDS),
         expand("figures/immune_states/{sample}_immune_states.png", sample=SAMPLE_IDS),
         expand("figures/clustering/{sample}/spatial_leiden_clusters.png", sample=SAMPLE_IDS),
@@ -29,10 +34,10 @@ rule all:
         expand("figures/morphology_overlays/{sample}/tcell_infiltration_morphology_overlay.png", sample=SAMPLE_IDS),
         expand("figures/morphology_overlays/{sample}/cytotoxic_activity_morphology_overlay.png", sample=SAMPLE_IDS),
         expand("figures/morphology_overlays/{sample}/immune_states_morphology_overlay.png", sample=SAMPLE_IDS),
-        expand(
-            "results/summary/{sample}_immune_state_summary.csv",
-            sample=SAMPLE_IDS
-        ),
+
+        expand("figures/statistics/{sample}_correlation_heatmap.png", sample=SAMPLE_IDS),
+        expand("figures/interface/{sample}_distance_histogram.png", sample=SAMPLE_IDS),
+        expand("figures/interface/{sample}_interface_map.png", sample=SAMPLE_IDS)
 
 
 rule prepare_visium:
@@ -208,6 +213,7 @@ rule plot_morphology_overlays:
             --outdir {params.outdir}
         """
 
+
 rule summarise_immune_states:
     input:
         "results/classified/{sample}.h5ad"
@@ -216,6 +222,73 @@ rule summarise_immune_states:
     shell:
         """
         python scripts/summarise_immune_states.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule calculate_programme_correlations:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        "results/statistics/{sample}_programme_correlations.csv"
+    shell:
+        """
+        python scripts/calculate_programme_correlations.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_programme_correlations:
+    input:
+        "results/statistics/{sample}_programme_correlations.csv"
+    output:
+        "figures/statistics/{sample}_correlation_heatmap.png"
+    shell:
+        """
+        python scripts/plot_programme_correlations.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule tumour_immune_interface:
+    input:
+        "results/classified/{sample}.h5ad"
+    output:
+        distances="results/interface/{sample}_interface_distances.csv",
+        summary="results/interface/{sample}_interface_summary.csv"
+    shell:
+        """
+        python scripts/tumour_immune_interface.py \
+            --input {input} \
+            --output {output.distances} \
+            --summary {output.summary}
+        """
+
+
+rule plot_interface_distances:
+    input:
+        "results/interface/{sample}_interface_distances.csv"
+    output:
+        "figures/interface/{sample}_distance_histogram.png"
+    shell:
+        """
+        python scripts/plot_interface_distances.py \
+            --input {input} \
+            --output {output}
+        """
+
+
+rule plot_interface_map:
+    input:
+        "results/interface/{sample}_interface_distances.csv"
+    output:
+        "figures/interface/{sample}_interface_map.png"
+    shell:
+        """
+        python scripts/plot_interface_map.py \
             --input {input} \
             --output {output}
         """
